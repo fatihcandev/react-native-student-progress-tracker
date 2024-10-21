@@ -1,8 +1,11 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { getFirestore } from 'firebase/firestore'
+// eslint-disable-next-line import/named
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth'
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: 'student-progress-tracker-f69e2.firebaseapp.com',
   projectId: 'student-progress-tracker-f69e2',
   storageBucket: 'student-progress-tracker-f69e2.appspot.com',
@@ -12,4 +15,7 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
+export const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+})
+export const db = getFirestore(app)

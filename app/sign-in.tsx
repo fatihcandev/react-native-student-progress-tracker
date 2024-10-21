@@ -8,15 +8,17 @@ export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const theme = useTheme()
-  const { loginUser, error, clearError, isLoggingIn, user } = useAuth()
+  const { loginUser, clearError, error, isLoggingIn, user } = useAuth()
 
   if (user) {
     return <Redirect href="/" />
   }
 
   const handleLogin = async () => {
-    await loginUser(email, password)
-    router.push('/')
+    const user = await loginUser(email, password)
+    if (user) {
+      router.push('/')
+    }
   }
 
   return (

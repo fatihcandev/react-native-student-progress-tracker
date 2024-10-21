@@ -1,4 +1,5 @@
-import { auth } from '@/firebaseConfig'
+import { useState, useEffect, useCallback } from 'react'
+import { auth, db } from '@/firebaseConfig'
 import { FirebaseError } from 'firebase/app'
 import {
   createUserWithEmailAndPassword,
@@ -6,8 +7,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   User,
+  UserCredential,
 } from 'firebase/auth'
-import { useState, useEffect, useCallback } from 'react'
+import { collection, doc, setDoc } from 'firebase/firestore'
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null)
@@ -26,25 +28,49 @@ export const useAuth = () => {
 
   const loginUser = useCallback(async (email: string, password: string) => {
     setIsLoggingIn(true)
+    let user: UserCredential | null = null
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      user = await signInWithEmailAndPassword(auth, email, password)
     } catch (error) {
       setError((error as FirebaseError).message)
     } finally {
       setIsLoggingIn(false)
     }
+    return user
   }, [])
 
-  const signupUser = useCallback(async (email: string, password: string) => {
-    setIsSigningUp(true)
-    try {
-      await createUserWithEmailAndPassword(auth, email, password)
-    } catch (error) {
-      setError((error as FirebaseError).message)
-    } finally {
-      setIsSigningUp(false)
-    }
-  }, [])
+  const signupUser = useCallback(
+    async ({
+      name,
+      email,
+      password,
+    }: {
+      name: string
+      email: string
+      password: string
+    }) => {
+      setIsSigningUp(true)
+      try {
+        const { user } = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password,
+        )
+        const usersRef = collection(db, 'users')
+        await setDoc(doc(usersRef, user.uid), {
+          email,
+          enrolledCourses: [],
+          name,
+          progress: 0,
+        })
+      } catch (error) {
+        setError((error as FirebaseError).message)
+      } finally {
+        setIsSigningUp(false)
+      }
+    },
+    [],
+  )
 
   const logoutUser = useCallback(async () => {
     try {

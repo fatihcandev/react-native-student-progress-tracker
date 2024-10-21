@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks'
 export default function SignUp() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const theme = useTheme()
   const { signupUser, error, clearError, isSigningUp, user } = useAuth()
 
@@ -15,12 +16,18 @@ export default function SignUp() {
   }
 
   const handleSignup = async () => {
-    await signupUser(email, password)
+    await signupUser({ name, email, password })
     router.push('/sign-in')
   }
   return (
     <>
       <View style={styles.container}>
+        <TextInput
+          textContentType="name"
+          label="Full name"
+          value={name}
+          onChangeText={setName}
+        />
         <TextInput
           keyboardType="email-address"
           textContentType="emailAddress"
